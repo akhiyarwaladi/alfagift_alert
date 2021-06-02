@@ -21,9 +21,6 @@ try:
         user="akhiyar_waladi",
         password="nd4n6fk9")
 
-    
-    print("You are connected to -- \n{}".format(record))
-
 except (Exception, psycopg2.Error) as error :
     print("Error while connecting to PostgreSQL", error)
 
@@ -56,7 +53,7 @@ m1, m2, m3, m4 = False, False, False, False
 if (datetime.now().hour) in [2, 3, 4, 5, 6]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
-    b3, b4 = True
+    b3, b4 = True, True
 if (datetime.now().hour) == 7:
     b2 = True
 
