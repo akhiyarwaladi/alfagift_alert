@@ -42,10 +42,16 @@ print(datetime.now())
 
 const_out_order = 1000
 const_out_voucher_amount = 1000000
-const_out_voucher_count = 10
-const_out_point_issue = 50000
-const_out_point_redeem = 50000
+const_out_voucher_count = 50
+const_out_point_issue = 100000
+const_out_point_redeem = 100000
 
+
+# const_out_order = 500
+# const_out_voucher_amount = 300000
+# const_out_voucher_count = 10
+# const_out_point_issue = 2000
+# const_out_point_redeem = 20000
 
 b1, b2, b3, b4 = False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
@@ -60,13 +66,13 @@ if (datetime.now().hour) == 7:
 # b1, b2, b3, b4 = True, True, True, True
 
 
-# In[ ]:
-
-
-
-
-
 # In[4]:
+
+
+print(b1, b2, b3, b4)
+
+
+# In[5]:
 
 
 dr_order = (datetime.now()).replace(minute=0, second=0)
@@ -80,7 +86,7 @@ dr_redeem_issue = (datetime.now()).replace(second=0)
 
 
 
-# In[5]:
+# In[6]:
 
 
 out_count_order = ''
@@ -95,7 +101,9 @@ if b1:
     count_order = pd.read_sql(q_1, connection)
     
     out_count_order = count_order[count_order['count'] > const_out_order]
+    
     if len(out_count_order) > 0:
+        out_count_order['count'] = out_count_order['count'].astype('int')
         m1 = True
 
 
@@ -129,7 +137,7 @@ if b1:
 
 
 
-# In[6]:
+# In[7]:
 
 
 out_voucher_check = ''
@@ -146,6 +154,7 @@ if b2:
         and tbto_ponta_id is not null
         and tbto_voucher_usage is not null
         and tto.tbto_status not in ('18','10','11')
+        and tbto_voucher_code not in ('')
         and tbto_status is not null
     group by tbto_ponta_id
     order by sum_voucher_usage desc
@@ -166,6 +175,7 @@ if b2:
         and tbto_ponta_id is not null
         and tbto_voucher_usage is not null
         and tto.tbto_status not in ('18','10','11')
+        and tbto_voucher_code not in ('')
         and tbto_status is not null
     group by tbto_ponta_id
     order by count_unique_voucher desc
@@ -177,7 +187,10 @@ if b2:
     out_voucher_check = voucher_check[voucher_check['sum_voucher_usage'] >= const_out_voucher_amount]
     out_voucher_check_2 = voucher_check_2[voucher_check_2['count_unique_voucher'] >= const_out_voucher_count]
     
+    
     if (len(out_voucher_check) > 0) or (len(out_voucher_check_2) > 0):
+        out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage'].apply(lambda x : "{:,}".format(x))
+        out_voucher_check_2['count_unique_voucher'] = out_voucher_check_2['count_unique_voucher'].astype('int')
         m2 = True
 
 
@@ -187,13 +200,7 @@ if b2:
 
 
 
-# In[ ]:
-
-
-
-
-
-# In[7]:
+# In[8]:
 
 
 out_point_redeem = ''
@@ -217,6 +224,7 @@ if b3:
     
     out_point_redeem = point_redeem[point_redeem['sum_ponta_redeem'] > const_out_point_redeem]
     if len(out_point_redeem) > 0:
+        out_point_redeem['sum_ponta_redeem'] = out_point_redeem['sum_ponta_redeem'].apply(lambda x : "{:,}".format(x))
         m3 = True
 
 
@@ -226,7 +234,7 @@ if b3:
 
 
 
-# In[8]:
+# In[9]:
 
 
 out_point_issue = ''
@@ -248,20 +256,10 @@ if b4:
     point_issue = pd.read_sql(q_4, connection)
     
     out_point_issue = point_issue[point_issue['sum_ponta_issued'] > const_out_point_issue]
+    
     if len(out_point_issue) > 0:
+        out_point_issue['sum_ponta_issued'] = out_point_issue['sum_ponta_issued'].apply(lambda x : "{:,}".format(x))
         m4 = True
-
-
-# In[ ]:
-
-
-
-
-
-# In[9]:
-
-
-print(m1,m2,m3,m4)
 
 
 # In[ ]:
@@ -273,43 +271,46 @@ print(m1,m2,m3,m4)
 # In[10]:
 
 
-if m1 or m2 or m3 or m4:
-    
-    outdf_format = ''
-    body_format = [
-        'Num of order in last 1 hour',
-        'Voucher usage amount sum in last 1 day',
-        'Voucher usage count sum in last 1 day',
-        'Point redeem sum in last 30 minutes',
-        'Point issue sum in last 30 minutes',
-    ]
-    for idx, outdf in enumerate([out_count_order, out_voucher_check, out_voucher_check_2, out_point_redeem, out_point_issue]):
-        if len(outdf) > 0:
-            outdf_format += '{} <br> {} <br><hr><br>'.format(body_format[idx], outdf.to_html())
-    # mechanism to send email
-
-
-    email_date = dr_order.strftime('%d%b%y %H:%M')
-    lib = lib_3d.desan()
-    # preceiver = "benny.chandra@gli.id, erick.alviyendra@gli.id, reinaldo@gli.id, \
-    #             prasistyo.utomo@gli.id, kevin.runtupalit@gli.id, \
-    #             dita.rahmawati@gli.id, william.d.sinolungan@gli.id, \
-    #             akhiyar.waladi@gli.id"
-
-    preceiver = "akhiyar.waladi@gli.id, william.d.sinolungan@gli.id"
-    print(preceiver)
-
-
-    psubject = 'Alfagift Alert [{}]'.format(email_date)
-    pbody = """Time {} there is an abnormal transaction, please check below <br> <br> {}""".format(email_date, outdf_format)
-
-    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+print(m1,m2,m3,m4)
 
 
 # In[ ]:
 
 
 
+
+
+# In[11]:
+
+
+if m1 or m2 or m3 or m4:
+    
+    outdf_format = ''
+    body_format = [
+        'Number of order in last 1 hour',
+        'Voucher usage amount sum in last 1 day',
+        'Voucher usage count sum in last 1 day',
+        'Point redeem sum (using point) in last 30 minutes',
+        'Point issue sum (get point) in last 30 minutes',
+    ]
+    for idx, outdf in enumerate([out_count_order, out_voucher_check, out_voucher_check_2, out_point_redeem, out_point_issue]):
+        if len(outdf) > 0:
+            outdf_format += '{} <br> {} <br><hr><br>'.format(body_format[idx], outdf.to_html())
+            
+            
+    # mechanism to send email
+    email_date = dr_order.strftime('%d%b%y %H:%M')
+    lib = lib_3d.desan()
+    preceiver = "benny.chandra@gli.id, erick.alviyendra@gli.id, reinaldo@gli.id,                 prasistyo.utomo@gli.id, kevin.runtupalit@gli.id,                 dita.rahmawati@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
+
+#     preceiver = "akhiyarwaladi@gmail.com"
+    print(preceiver)
+
+
+    psubject = 'Alfagift Alert [{}]'.format(email_date)
+    pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
+
+    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
 
 
 # In[ ]:
