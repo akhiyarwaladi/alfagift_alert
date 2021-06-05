@@ -115,10 +115,10 @@ if len(dfa) > 0:
     # telegram send message
     bot = telegram.Bot(token='1539145464:AAGEJ4OjCNTGhAOYi2bRsqkiSVI2Ntt4ndo')
 
-    x_m = dfa.to_markdown()
+    x_m = dfa.to_markdown(index=False, tablefmt="grid")
     head_chat = '{} --> {} \nUsing vouchers that have been used before'.format(t2_window,t1_now)
 
-    bot.send_message(chat_id='@alfagift_alert', text="{}\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
+    bot.send_message(chat_id='@alfagift_alert', text="{}\n\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
 
 
 # In[ ]:

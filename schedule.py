@@ -6,8 +6,12 @@
 
 import psycopg2
 import pandas as pd
+pd.options.mode.chained_assignment = None 
 import lib_3d
 from datetime import datetime, timedelta
+
+import telegram
+from telegram import ParseMode
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -47,12 +51,6 @@ const_out_point_issue = 100000
 const_out_point_redeem = 100000
 
 
-# const_out_order = 500
-# const_out_voucher_amount = 300000
-# const_out_voucher_count = 10
-# const_out_point_issue = 2000
-# const_out_point_redeem = 20000
-
 b1, b2, b3, b4 = False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
 
@@ -60,10 +58,16 @@ if (datetime.now().hour) in [2, 3, 4, 5, 6]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
-if (datetime.now().hour) == 7:
+if (datetime.now().hour) == 1:
     b2 = True
 
 # b1, b2, b3, b4 = True, True, True, True
+
+# const_out_order = 500
+# const_out_voucher_amount = 300000
+# const_out_voucher_count = 10
+# const_out_point_issue = 2000
+# const_out_point_redeem = 20000
 
 
 # In[4]:
@@ -103,7 +107,7 @@ if b1:
     out_count_order = count_order[count_order['count'] > const_out_order]
     
     if len(out_count_order) > 0:
-        out_count_order['count'] = out_count_order['count'].astype('int')
+        out_count_order['count'] = out_count_order['count']                    .astype(int).apply(lambda x : "{:,}".format(x))
         m1 = True
 
 
@@ -189,7 +193,7 @@ if b2:
     
     
     if (len(out_voucher_check) > 0) or (len(out_voucher_check_2) > 0):
-        out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage'].apply(lambda x : "{:,}".format(x))
+        out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage']                            .astype(int).apply(lambda x : "{:,d}".format(x))
         out_voucher_check_2['count_unique_voucher'] = out_voucher_check_2['count_unique_voucher'].astype('int')
         m2 = True
 
@@ -224,7 +228,7 @@ if b3:
     
     out_point_redeem = point_redeem[point_redeem['sum_ponta_redeem'] > const_out_point_redeem]
     if len(out_point_redeem) > 0:
-        out_point_redeem['sum_ponta_redeem'] = out_point_redeem['sum_ponta_redeem'].apply(lambda x : "{:,}".format(x))
+        out_point_redeem['sum_ponta_redeem'] = out_point_redeem['sum_ponta_redeem']                    .astype(int).apply(lambda x : "{:,}".format(x))
         m3 = True
 
 
@@ -258,7 +262,7 @@ if b4:
     out_point_issue = point_issue[point_issue['sum_ponta_issued'] > const_out_point_issue]
     
     if len(out_point_issue) > 0:
-        out_point_issue['sum_ponta_issued'] = out_point_issue['sum_ponta_issued'].apply(lambda x : "{:,}".format(x))
+        out_point_issue['sum_ponta_issued'] = out_point_issue['sum_ponta_issued']                    .astype(int).apply(lambda x : "{:,d}".format(x))
         m4 = True
 
 
@@ -311,10 +315,29 @@ if m1 or m2 or m3 or m4:
     pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
 
     lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+    
+    
+    
+    # telegram send message
+    bot = telegram.Bot(token='1539145464:AAGEJ4OjCNTGhAOYi2bRsqkiSVI2Ntt4ndo')
+
+    outdf_format = ''
+    body_format = [
+        'Number of order in last 1 hour',
+        'Voucher usage amount sum in last 1 day',
+        'Voucher usage count sum in last 1 day',
+        'Point redeem sum (using point) in last 30 minutes',
+        'Point issue sum (get point) in last 30 minutes',
+    ]
+    out_voucher_check = out_voucher_check.rename(columns={'sum_voucher_usage':'sum'})
+    out_voucher_check_2 = out_voucher_check_2.rename(columns={'count_unique_voucher':'count'})
+    out_point_redeem = out_point_redeem.rename(columns={'sum_ponta_redeem':'sum','count_order_id':'c'}).drop('c',1)
+    out_point_issue = out_point_issue.rename(columns={'sum_ponta_issued':'sum','count_order_id':'c'}).drop('c',1)
+    for idx, outdf in enumerate([out_count_order, out_voucher_check, out_voucher_check_2, out_point_redeem, out_point_issue]):
+        if len(outdf) > 0:
+            outdf_format += '{} {} \n\n<pre>{}</pre>\n\n------------------------------------------------------------------\n\n'            .format(email_date, body_format[idx], outdf.to_markdown(index=False, tablefmt="grid"))
 
 
-# In[ ]:
 
-
-
+    bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),                     parse_mode=ParseMode.HTML)
 
