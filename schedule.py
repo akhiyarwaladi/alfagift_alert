@@ -44,7 +44,7 @@ print(datetime.now())
 # In[3]:
 
 
-const_out_order = 1000
+const_out_order = 600
 const_out_voucher_amount = 1000000
 const_out_voucher_count = 50
 const_out_point_issue = 100000
@@ -54,11 +54,11 @@ const_out_point_redeem = 100000
 b1, b2, b3, b4 = False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
 
-if (datetime.now().hour) in [2, 3, 4, 5, 6]:
+if (datetime.now().hour) in [1, 2, 3, 4, 5, 6]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
-if (datetime.now().hour) == 1:
+if (datetime.now().hour) == 13:
     b2 = True
 
 # b1, b2, b3, b4 = True, True, True, True
@@ -79,7 +79,7 @@ print(b1, b2, b3, b4)
 # In[5]:
 
 
-dr_order = (datetime.now()).replace(minute=0, second=0)
+dr_order = (datetime.now()).replace(second=0)
 dr_voucher = datetime.now().date()
 dr_redeem_issue = (datetime.now()).replace(second=0)
 
@@ -109,24 +109,6 @@ if b1:
     if len(out_count_order) > 0:
         out_count_order['count'] = out_count_order['count']                    .astype(int).apply(lambda x : "{:,}".format(x))
         m1 = True
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
@@ -329,10 +311,14 @@ if m1 or m2 or m3 or m4:
         'Point redeem sum (using point) in last 30 minutes',
         'Point issue sum (get point) in last 30 minutes',
     ]
-    out_voucher_check = out_voucher_check.rename(columns={'sum_voucher_usage':'sum'})
-    out_voucher_check_2 = out_voucher_check_2.rename(columns={'count_unique_voucher':'count'})
-    out_point_redeem = out_point_redeem.rename(columns={'sum_ponta_redeem':'sum','count_order_id':'c'}).drop('c',1)
-    out_point_issue = out_point_issue.rename(columns={'sum_ponta_issued':'sum','count_order_id':'c'}).drop('c',1)
+    if len(out_voucher_check) > 0:
+        out_voucher_check = out_voucher_check.rename(columns={'sum_voucher_usage':'sum'})
+    if len(out_voucher_check_2) > 0:
+        out_voucher_check_2 = out_voucher_check_2.rename(columns={'count_unique_voucher':'count'})
+    if len(out_point_redeem) > 0:
+        out_point_redeem = out_point_redeem.rename(columns={'sum_ponta_redeem':'sum','count_order_id':'c'}).drop('c',1)
+    if len(out_point_issue) > 0:
+        out_point_issue = out_point_issue.rename(columns={'sum_ponta_issued':'sum','count_order_id':'c'}).drop('c',1)
     for idx, outdf in enumerate([out_count_order, out_voucher_check, out_voucher_check_2, out_point_redeem, out_point_issue]):
         if len(outdf) > 0:
             outdf_format += '{} {} \n\n<pre>{}</pre>\n\n------------------------------------------------------------------\n\n'            .format(email_date, body_format[idx], outdf.to_markdown(index=False, tablefmt="grid"))
