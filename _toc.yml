@@ -1,4 +1,4 @@
-format: jb-article
+format: jb-book
 root: content
 sections:
 - file: exploration.ipynb
