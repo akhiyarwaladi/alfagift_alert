@@ -45,8 +45,8 @@ print(datetime.now())
 
 
 const_out_order = 600
-const_out_voucher_amount = 1000000
-const_out_voucher_count = 50
+const_out_voucher_amount = 2000000
+const_out_voucher_count = 20
 const_out_point_issue = 100000
 const_out_point_redeem = 100000
 
@@ -54,7 +54,7 @@ const_out_point_redeem = 100000
 b1, b2, b3, b4 = False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
 
-if (datetime.now().hour) in [1, 2, 3, 4, 5, 6]:
+if (datetime.now().hour) in [1, 2, 3, 4, 6]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
@@ -287,7 +287,7 @@ if m1 or m2 or m3 or m4:
     # mechanism to send email
     email_date = dr_order.strftime('%d%b%y %H:%M')
     lib = lib_3d.desan()
-    preceiver = "benny.chandra@gli.id, erick.alviyendra@gli.id, reinaldo@gli.id,                 prasistyo.utomo@gli.id, kevin.runtupalit@gli.id,                 dita.rahmawati@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
+    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
 
 #     preceiver = "akhiyarwaladi@gmail.com"
     print(preceiver)

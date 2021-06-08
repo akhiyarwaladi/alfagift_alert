@@ -46,7 +46,7 @@ t1_now = datetime.strftime(t1, '%Y-%m-%d %H:%M')
 t2 = (t1- timedelta(minutes=15))
 t2_window = datetime.strftime(t2,'%Y-%m-%d %H:%M')
 # define 7 week before lower bound of window that we suspect
-t2_frame = datetime.strftime((t2.date() - timedelta(days=7)),'%Y-%m-%d %H:%M')
+t2_frame = datetime.strftime((t2.date() - timedelta(days=30)),'%Y-%m-%d %H:%M')
 
 print("check time {} {}".format(t2_window, t1_now))
 print("past time {} {}".format(t2_frame, t2_window))
@@ -98,7 +98,7 @@ if len(dfa) > 0:
     
     # mechanism to send email
     lib = lib_3d.desan()
-    preceiver = "benny.chandra@gli.id, erick.alviyendra@gli.id, reinaldo@gli.id,                 prasistyo.utomo@gli.id, kevin.runtupalit@gli.id,                 dita.rahmawati@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
+    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
 
 #     preceiver = "akhiyar.waladi@gli.id"
     print(preceiver)
