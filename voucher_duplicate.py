@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[18]:
 
 
 import pandas as pd
@@ -36,14 +36,14 @@ except Exception as error:
     sys.exit()
 
 
-# In[2]:
+# In[19]:
 
 
 # define now date
 t1 = datetime.now()
 t1_now = datetime.strftime(t1, '%Y-%m-%d %H:%M')
 # define lower bound of window time that we want to check
-t2 = (t1- timedelta(minutes=15))
+t2 = (t1- timedelta(minutes=240))
 t2_window = datetime.strftime(t2,'%Y-%m-%d %H:%M')
 # define 7 week before lower bound of window that we suspect
 t2_frame = datetime.strftime((t2.date() - timedelta(days=30)),'%Y-%m-%d %H:%M')
@@ -68,7 +68,7 @@ df_window = pd.read_sql_query(main,cpo,params=[t2_window,t1_now])
 df_frame = pd.read_sql_query(main,cpo,params=[t2_frame,t2_window])
 
 
-# In[3]:
+# In[20]:
 
 
 df_window_g = df_window.groupby('tbto_voucher_code').agg({'tbto_no':'count'}).reset_index()
@@ -85,13 +85,62 @@ dfa = dfa.rename(columns = {'tbto_no':'voucher_usage'}).reset_index()
 dfa = dfa[dfa['voucher_usage']>=2]
 
 
+# In[21]:
+
+
+path_hist = '/home/server/gli-data-science/akhiyar/alfagift_alert/hist_voucher.csv'
+
+
+# In[22]:
+
+
+dfa_hist = pd.read_csv(path_hist)
+dfa_hist['date'] = pd.to_datetime(dfa_hist['date'])
+
+
+# In[23]:
+
+
+dfa = dfa[~dfa['tbto_voucher_code'].isin(dfa_hist['tbto_voucher_code'])]
+
+
+# In[24]:
+
+
+dfa['date'] = t1
+
+
+# In[25]:
+
+
+dfa_hist = pd.concat([dfa_hist, dfa])
+
+
+# In[26]:
+
+
+dfa_hist = dfa_hist[dfa_hist['date'] > t1 - timedelta(days=2)]
+
+
+# In[27]:
+
+
+dfa_hist.to_csv(path_hist, index=False)
+
+
 # In[ ]:
 
 
 
 
 
-# In[4]:
+# In[28]:
+
+
+dfa = dfa.drop('date', 1)
+
+
+# In[30]:
 
 
 if len(dfa) > 0:
@@ -121,10 +170,10 @@ if len(dfa) > 0:
     bot.send_message(chat_id='@alfagift_alert', text="{}\n\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
 
 
-# In[ ]:
+# In[31]:
 
 
-
+cpo.close()
 
 
 # In[ ]:

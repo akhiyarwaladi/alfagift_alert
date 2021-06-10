@@ -58,7 +58,7 @@ if (datetime.now().hour) in [1, 2, 3, 4, 6]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
-if (datetime.now().hour) == 13:
+if ((datetime.now().hour) == 13) and ((datetime.now().minute)) == 0:
     b2 = True
 
 # b1, b2, b3, b4 = True, True, True, True
@@ -325,5 +325,68 @@ if m1 or m2 or m3 or m4:
 
 
 
-    bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),                     parse_mode=ParseMode.HTML)
+#     bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),\
+#                      parse_mode=ParseMode.HTML)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[12]:
+
+
+# import lib_3d
+
+# lib = lib_3d.desan()
+# preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, \
+#             akhiyar.waladi@gli.id"
+
+# #     preceiver = "akhiyarwaladi@gmail.com"
+# print(preceiver)
+
+
+# psubject = 'Alfagift Alert [TEST]'
+# pbody = 'a test email'
+
+# lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+
+
+
+# In[ ]:
+
+
+
 
