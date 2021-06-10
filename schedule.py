@@ -325,8 +325,7 @@ if m1 or m2 or m3 or m4:
 
 
 
-#     bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),\
-#                      parse_mode=ParseMode.HTML)
+    bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),                     parse_mode=ParseMode.HTML)
 
 
 # In[ ]:
