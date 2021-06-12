@@ -54,7 +54,7 @@ const_out_point_redeem = 100000
 b1, b2, b3, b4 = False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
 
-if (datetime.now().hour) in [1, 2, 3, 4, 6]:
+if (datetime.now().hour) in [1, 2, 3, 4]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
@@ -100,6 +100,7 @@ if b1:
         from tb_transaction_order tto 
         where tto.tbto_create_date between '{shift_str}' and '{now_str}'
         and tbto_status is not null
+        and tbto_status in ('12','14','15')
     '''.format(shift_str = (dr_order-timedelta(hours=1)), now_str = dr_order)
 
     count_order = pd.read_sql(q_1, connection)
