@@ -1,4 +1,2 @@
-format: jb-book
-root: content
-sections:
-- file: exploration.ipynb
+ormat: jb-article
+root: exploration.ipynb
