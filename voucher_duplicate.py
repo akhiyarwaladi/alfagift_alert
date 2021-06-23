@@ -165,7 +165,7 @@ if len(dfa) > 0:
     bot = telegram.Bot(token='1539145464:AAF3_pwD6clrnXWLDvB-oSkA1pqLUU2RKE0')
 
     x_m = dfa.rename(columns={'voucher_usage':'usage'}).to_markdown(index=False, tablefmt="grid")
-    head_chat = '{} --> {} \nUsing vouchers that have been used before'.format(t2_window,t1_now)
+    head_chat = 'Using vouchers that have been used before\n{} --> {}'.format(t2_window,t1_now)
 
     bot.send_message(chat_id='@alfagift_alert', text="{}\n\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
 
