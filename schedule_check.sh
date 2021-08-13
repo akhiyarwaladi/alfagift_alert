@@ -18,7 +18,5 @@ unset __conda_setup
 export PATH="$PATH:/opt/oracle/instantclient_19_8"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/oracle/instantclient_19_8"
 
-jupyter-book build /home/server/gli-data-science/akhiyar/alfagift_alert/exploration.ipynb --builder html
 
-rm -rf /var/www/html/gli_data_science/_build/
-mv /home/server/gli-data-science/akhiyar/alfagift_alert/_build /var/www/html/gli_data_science
+/opt/anaconda3/bin/python /home/server/gli-data-science/akhiyar/alfagift_alert/schedule.py
