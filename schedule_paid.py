@@ -35,23 +35,6 @@ def connect_prd_order():
     return connection
 
 
-import cx_Oracle    
-def connect_alfabi():
-    try:
-        conn_str = u'report/justd0it@10.234.152.61:1521/alfabi'
-        connection_alfabi = cx_Oracle.connect(conn_str)
-    except Exception as e:
-        print(e)
-        
-    return connection_alfabi
-
-
-# %%
-
-
-
-
-
 # %%
 
 
@@ -65,7 +48,7 @@ if ((datetime.now().hour) in [7, 8, 9, 10, 11, 12]) and ((datetime.now().minute)
     b2 = True
 
 
-b1, b2 = False, True
+# b1, b2 = False, True
 
 
 # %%
@@ -100,11 +83,11 @@ if b1:
         connection.close()
 
         
-        res_order = res_order[res_order['tbto_application_id'].isin([402])]
+        #res_order = res_order[res_order['tbto_application_id'].isin([402])]
         if len(res_order) == 0:
            
-            message.append('There is no paid (tbto_status=12) in app order (app_id=904&905)')
-            message.append('There is no paid (tbto_status=12) in web order (app_id=402)')
+            message.append('There is no paid [status=12] on app order [app_id=904,905]')
+            message.append('There is no paid [status=12] on web order [app_id=402]')
             m1 = True
 
         else:
@@ -113,10 +96,10 @@ if b1:
 
 
             if len(res_app) == 0:
-                message.append('There is no paid (tbto_status=12) in app order (app_id=904&905)')
+                message.append('There is no paid [status=12] on app order [app_id=904,905]')
                 m1 = True
             if len(res_web) == 0:
-                message.append('There is no paid (tbto_status=12) in web order (app_id=402)')
+                message.append('There is no paid [status=12] on web order [app_id=402]')
                 m1 = True
 
     
@@ -124,8 +107,6 @@ if b1:
         print(e)
 
 
-
-# %%
 
 # %%
 
@@ -147,11 +128,11 @@ if b2:
         res_order = res_order.dropna().astype(int)
         connection.close()
 
-        res_order = res_order[res_order['tbto_application_id'].isin([402])]
+        #res_order = res_order[res_order['tbto_application_id'].isin([402])]
         if len(res_order) == 0:
             
-            message.append('There is no paid (tbto_status=12) in app order (app_id=904&905)')
-            message.append('There is no paid (tbto_status=12) in web order (app_id=402)')
+            message.append('There is no paid [status=12] on app order [app_id=904,905]')
+            message.append('There is no paid [status=12] on web order [app_id=402]')
             m2 = True
 
         else:
@@ -160,10 +141,10 @@ if b2:
 
 
             if len(res_app) == 0:
-                message.append('There is no paid (tbto_status=12) in app order (app_id=904&905)')
+                message.append('There is no paid [status=12] on app order [app_id=904,905]')
                 m2 = True
             if len(res_web) == 0:
-                message.append('There is no paid (tbto_status=12) in web order (app_id=402)')
+                message.append('There is no paid [status=12] on web order [app_id=402]')
                 m2 = True
     except Exception as e:
         print(e)
@@ -176,7 +157,7 @@ if b2:
 # %%
 
 
-print(m1,m2)
+print("m1:{} m2:{}".format(m1,m2))
 
 
 # %%
@@ -237,12 +218,6 @@ if m1 or m2:
 
 
 
-
-# %%
-
-
-
-res_order
 
 # %%
 
