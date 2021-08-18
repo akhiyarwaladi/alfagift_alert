@@ -36,15 +36,19 @@ def connect_prd_order():
 
 
 # %%
+dr_order = (datetime.now()).replace(second=0, microsecond=0)
+message = []
+
+# %%
 
 
 
 b1, b2 = False, False
 m1, m2 = False, False
 
-if ((datetime.now().hour) in [1, 2, 3, 4, 5, 6]) and ((datetime.now().minute) == 0):
+if ((dr_order.hour) in (list(range(5,24)) + [0])) and ((dr_order.minute) == 0):
     b1 = True
-if ((datetime.now().hour) in [7, 8, 9, 10, 11, 12]) and ((datetime.now().minute) % 15 == 0):
+if ((dr_order.hour) in (list(range(5,24)) + [0])) and ((dr_order.minute) % 15 == 0):
     b2 = True
 
 
@@ -52,12 +56,10 @@ if ((datetime.now().hour) in [7, 8, 9, 10, 11, 12]) and ((datetime.now().minute)
 
 
 # %%
-print(datetime.now(), b1, b2)
+print(dr_order, b1, b2)
 
 
 # %%
-dr_order = (datetime.now()).replace(second=0, microsecond=0)
-message = []
 
 
 # %%
@@ -82,24 +84,26 @@ if b1:
         res_order = res_order.dropna().astype(int)
         connection.close()
 
-        
+        ## testing purpose
         #res_order = res_order[res_order['tbto_application_id'].isin([402])]
         if len(res_order) == 0:
-           
-            message.append('There is no paid [status=12] on app order [app_id=904,905]')
-            message.append('There is no paid [status=12] on web order [app_id=402]')
+
+#             message.append('There is no transaction [status=12] on app order [app_id=904,905]')
+            message.append('There is no transaction [status=12] on web order [app_id=402]')
             m1 = True
 
         else:
             res_app = res_order[res_order['tbto_application_id'].isin([904,905])]
             res_web = res_order[res_order['tbto_application_id'].isin([402])]
 
+            print(res_app.drop_duplicates(subset=['tbto_application_id']))
+            print(res_web.drop_duplicates(subset=['tbto_application_id']))
 
-            if len(res_app) == 0:
-                message.append('There is no paid [status=12] on app order [app_id=904,905]')
-                m1 = True
+#             if len(res_app) == 0:
+#                 message.append('There is no transaction [status=12] on app order [app_id=904,905]')
+#                 m1 = True
             if len(res_web) == 0:
-                message.append('There is no paid [status=12] on web order [app_id=402]')
+                message.append('There is no transaction [status=12] on web order [app_id=402]')
                 m1 = True
 
     
@@ -128,24 +132,26 @@ if b2:
         res_order = res_order.dropna().astype(int)
         connection.close()
 
+        ## testing purpose
         #res_order = res_order[res_order['tbto_application_id'].isin([402])]
         if len(res_order) == 0:
             
-            message.append('There is no paid [status=12] on app order [app_id=904,905]')
-            message.append('There is no paid [status=12] on web order [app_id=402]')
+            message.append('There is no transaction [status=12] on app order [app_id=904,905]')
+#             message.append('There is no transaction [status=12] on web order [app_id=402]')
             m2 = True
 
         else:
             res_app = res_order[res_order['tbto_application_id'].isin([904,905])]
             res_web = res_order[res_order['tbto_application_id'].isin([402])]
 
-
+            print(res_app.drop_duplicates(subset=['tbto_application_id']))
+            print(res_web.drop_duplicates(subset=['tbto_application_id']))
             if len(res_app) == 0:
-                message.append('There is no paid [status=12] on app order [app_id=904,905]')
+                message.append('There is no transaction [status=12] on app order [app_id=904,905]')
                 m2 = True
-            if len(res_web) == 0:
-                message.append('There is no paid [status=12] on web order [app_id=402]')
-                m2 = True
+#             if len(res_web) == 0:
+#                 message.append('There is no transaction [status=12] on web order [app_id=402]')
+#                 m2 = True
     except Exception as e:
         print(e)
         sys.exit(e)
@@ -179,9 +185,9 @@ if m1 or m2:
     # mechanism to send email
     email_date = dr_order.strftime('%d%b%y %H:%M')
     lib = lib_3d.desan()
-    #preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
+    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
 
-    preceiver = "akhiyarwaladi@gmail.com"
+    #preceiver = "akhiyarwaladi@gmail.com"
     print(preceiver)
 
 
@@ -204,7 +210,7 @@ if m1 or m2:
         
 
 
-    bot.send_message(chat_id='@alfagift_alert_stag', text="{}".format(out_format), parse_mode=ParseMode.HTML)
+    bot.send_message(chat_id='@alfagift_alert', text="{}".format(out_format), parse_mode=ParseMode.HTML)
 
 
 # %%
