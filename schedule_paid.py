@@ -18,7 +18,7 @@ from telegram import ParseMode
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
-pd.set_option('display.width', 1000)
+pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 
 def connect_prd_order():
@@ -46,9 +46,9 @@ message = []
 b1, b2 = False, False
 m1, m2 = False, False
 
-if ((dr_order.hour) in (list(range(5,24)) + [0])) and ((dr_order.minute) == 0):
+if ((dr_order.hour) in (list(range(0,24)))) and ((dr_order.minute) == 0):
     b1 = True
-if ((dr_order.hour) in (list(range(5,24)) + [0])) and ((dr_order.minute) % 15 == 0):
+if ((dr_order.hour) in (list(range(6,24)))) and ((dr_order.minute) % 15 == 0):
     b2 = True
 
 
@@ -57,9 +57,6 @@ if ((dr_order.hour) in (list(range(5,24)) + [0])) and ((dr_order.minute) % 15 ==
 
 # %%
 print(dr_order, b1, b2)
-
-
-# %%
 
 
 # %%
@@ -88,9 +85,14 @@ if b1:
         #res_order = res_order[res_order['tbto_application_id'].isin([402])]
         if len(res_order) == 0:
 
-#             message.append('There is no transaction [status=12] on app order [app_id=904,905]')
-            message.append('There is no transaction [status=12] on web order [app_id=402]')
-            m1 = True
+            if ((dr_order.hour) in (list(range(1,5)))):
+                if len(res_app) == 0:
+                    message.append('There is no transaction [status=12] on app order [app_id=904,905]')
+                    m1 = True
+            if ((dr_order.hour) in (list(range(6,24)))):
+                if len(res_web) == 0:
+                    message.append('There is no transaction [status=12] on web order [app_id=402]')
+                    m1 = True
 
         else:
             res_app = res_order[res_order['tbto_application_id'].isin([904,905])]
@@ -99,12 +101,14 @@ if b1:
             print(res_app.drop_duplicates(subset=['tbto_application_id']))
             print(res_web.drop_duplicates(subset=['tbto_application_id']))
 
-#             if len(res_app) == 0:
-#                 message.append('There is no transaction [status=12] on app order [app_id=904,905]')
-#                 m1 = True
-            if len(res_web) == 0:
-                message.append('There is no transaction [status=12] on web order [app_id=402]')
-                m1 = True
+            if ((dr_order.hour) in (list(range(1,5)))):
+                if len(res_app) == 0:
+                    message.append('There is no transaction [status=12] on app order [app_id=904,905]')
+                    m1 = True
+            if ((dr_order.hour) in (list(range(6,24)))):
+                if len(res_web) == 0:
+                    message.append('There is no transaction [status=12] on web order [app_id=402]')
+                    m1 = True
 
     
     except Exception as e:
