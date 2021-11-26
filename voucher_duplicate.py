@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
+# %%
 
-# In[1]:
+# %%
 
 
 import pandas as pd
@@ -28,17 +29,30 @@ otd = os.path.join(curdir)
 
 path_hist = '/home/server/gli-data-science/akhiyar/alfagift_alert/hist_voucher.csv'
 
-try:
-    cpo = psycopg2.connect(host="35.240.137.10",
-                            database="prd_order",
-                            user="akhiyar_waladi",
-                            password="nd4n6fk9")
-except Exception as error:
-    print("Error while connecting: ", error)
-    sys.exit()
+# try:
+#     cpo = psycopg2.connect(host="35.240.137.10",
+#                             database="prd_order",
+#                             user="akhiyar_waladi",
+#                             password="nd4n6fk9")
+# except Exception as error:
+#     print("Error while connecting: ", error)
+#     sys.exit()
 
 
-# In[2]:
+import warnings
+import sys
+import os
+sys.path.append('/home/server/gli-data-science/')
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+    os.environ["PYTHONWARNINGS"] = "ignore" # Also affect subprocesses
+
+import ds_db
+
+cpo, cursor = ds_db.connect_prd_order_4()
+
+
+# %%
 
 
 # define now date
@@ -70,7 +84,7 @@ df_window = pd.read_sql_query(main,cpo,params=[t2_window,t1_now])
 df_frame = pd.read_sql_query(main,cpo,params=[t2_frame,t2_window])
 
 
-# In[3]:
+# %%
 
 
 df_window_g = df_window.groupby('tbto_voucher_code').agg({'tbto_no':'count'}).reset_index()
@@ -86,20 +100,20 @@ dfa = dfa.rename(columns = {'tbto_no':'voucher_usage'}).reset_index()
 dfa = dfa[dfa['voucher_usage']>=2]
 
 
-# In[ ]:
+# %%
 
 
 
 
 
-# In[4]:
+# %%
 
 
 dfa_hist = pd.read_csv(path_hist)
 dfa_hist['date'] = pd.to_datetime(dfa_hist['date'])
 
 
-# In[5]:
+# %%
 
 
 # voucher code that sent to alert must not same as 
@@ -107,40 +121,40 @@ dfa = dfa[~dfa['tbto_voucher_code'].isin(dfa_hist['tbto_voucher_code'])]
 dfa['date'] = t1
 
 
-# In[ ]:
+# %%
 
 
 
 
 
-# In[6]:
+# %%
 
 
 dfa_hist = pd.concat([dfa_hist, dfa])
 dfa_hist = dfa_hist[dfa_hist['date'] >= t1 - timedelta(minutes=240)]
 dfa_hist.to_csv(path_hist, index=False)
-dfa = dfa.drop('date', 1)
+dfa = dfa.drop('date', axis=1)
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
+# %%
 
 
 
 
 
-# In[ ]:
+# %%
 
 
 
 
 
-# In[7]:
+# %%
+
+
+
+
+
+# %%
 
 
 if len(dfa) > 0:
@@ -162,27 +176,27 @@ if len(dfa) > 0:
 
     
     # telegram send message
-    bot = telegram.Bot(token='1539145464:AAF3_pwD6clrnXWLDvB-oSkA1pqLUU2RKE0')
+    bot = telegram.Bot(token='1539145464:AAEZKQzDhEwir3x5PDLzYKHxLC-2Igc7Gyo')
 
     x_m = dfa.rename(columns={'voucher_usage':'usage'}).to_markdown(index=False, tablefmt="grid")
     head_chat = 'Using vouchers that have been used before\n{} --> {}'.format(t2_window,t1_now)
 
-    bot.send_message(chat_id='@alfagift_alert', text="{}\n\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
+    bot.send_message(chat_id='-1001309547292', text="{}\n\n<pre>{}</pre>".format(head_chat, x_m),                     parse_mode=ParseMode.HTML)
 
 
-# In[8]:
+# %%
 
 
 cpo.close()
 
 
-# In[ ]:
+# %%
 
 
 
 
 
-# In[ ]:
+# %%
 
 
 

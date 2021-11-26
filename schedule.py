@@ -19,15 +19,28 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth', None)
 
-try:
-    connection = psycopg2.connect(
-        host="35.187.250.81",
-        database="prd_order",
-        user="akhiyar_waladi",
-        password="nd4n6fk9")
+# try:
+#     connection = psycopg2.connect(
+#         host="35.187.250.81",
+#         database="prd_order",
+#         user="akhiyar_waladi",
+#         password="nd4n6fk9")
 
-except (Exception, psycopg2.Error) as error :
-    print("Error while connecting to PostgreSQL", error)
+# except (Exception, psycopg2.Error) as error :
+#     print("Error while connecting to PostgreSQL", error)
+
+
+import warnings
+import sys
+import os
+sys.path.append('/home/server/gli-data-science/')
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+    os.environ["PYTHONWARNINGS"] = "ignore" # Also affect subprocesses
+
+import ds_db
+
+connection, cursor = ds_db.connect_prd_order_4()
 
 
 import cx_Oracle    
@@ -52,7 +65,7 @@ const_out_order = 600
 const_out_voucher_amount = 2000000
 const_out_voucher_count = 20
 const_out_point_issue = 100000
-const_out_point_redeem = 200000
+const_out_point_redeem = 1000000
 
 
 b1, b2, b3, b4, b5 = False, False, False, False, False
@@ -69,7 +82,7 @@ if ((datetime.now().hour) == 15) and ((datetime.now().minute)) == 30:
 if ((datetime.now().hour) == 13) and ((datetime.now().minute)) == 0 and ((datetime.now().day)) == 1:
     b5 = True
 
-# b1, b2, b3, b4 = True, True, True, True
+# b1, b2, b3, b4 = False, True, True, True
 
 # const_out_order = 500
 # const_out_voucher_amount = 300000
@@ -94,9 +107,16 @@ dr_redeem_issue = (datetime.now()).replace(second=0)
 
 # %%
 
+# %%
+dr_order = (datetime.now()).replace(second=0)
+start_look = dr_order-timedelta(minutes=15)
+end_look = dr_order
 
+# %%
+start_look
 
-
+# %%
+end_look
 
 # %%
 
@@ -452,7 +472,7 @@ if m1 or m2 or m3 or m4:
     
     
     # telegram send message
-    bot = telegram.Bot(token='1539145464:AAF3_pwD6clrnXWLDvB-oSkA1pqLUU2RKE0')
+    bot = telegram.Bot(token='1539145464:AAEZKQzDhEwir3x5PDLzYKHxLC-2Igc7Gyo')
 
     outdf_format = ''
     body_format = [
@@ -498,7 +518,7 @@ if m1 or m2 or m3 or m4:
 
 # %%
 if b5:
-    bot = telegram.Bot(token='1539145464:AAF3_pwD6clrnXWLDvB-oSkA1pqLUU2RKE0')
+    bot = telegram.Bot(token='1539145464:AAEZKQzDhEwir3x5PDLzYKHxLC-2Igc7Gyo')
 
     end_date = date.today()-timedelta(days=1)
     start_date = end_date.replace(day=1)
@@ -519,9 +539,9 @@ if b5:
     lib.kirim_email_noreply(preceiver, c_head, c_body, c_attach)
 
 
-    bot.send_message(chat_id='@alfagift_alert', text="{}".format(outdf_format),                     parse_mode=ParseMode.HTML)
+    bot.send_message(chat_id='-1001309547292', text="{}".format(outdf_format),                     parse_mode=ParseMode.HTML)
 
-    bot.sendDocument(chat_id='@alfagift_alert', document=open(c_attach, 'rb'))
+    bot.sendDocument(chat_id='-1001309547292', document=open(c_attach, 'rb'))
 
 
 # %%
