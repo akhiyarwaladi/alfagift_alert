@@ -19,4 +19,4 @@ export PATH="$PATH:/opt/oracle/instantclient_19_8"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/oracle/instantclient_19_8"
 
 
-/opt/anaconda3/bin/python /home/server/gli-data-science/akhiyar/alfagift_alert/schedule.py
+/opt/anaconda3/bin/python /home/server/gli-data-science/akhiyar/alfagift_alert/schedule_gen.py
