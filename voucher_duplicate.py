@@ -160,18 +160,18 @@ dfa = dfa.drop('date', axis=1)
 if len(dfa) > 0:
     
     # mechanism to send email
-    lib = lib_3d.desan()
-    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
+#     lib = lib_3d.desan()
+#     preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id,                 akhiyar.waladi@gli.id"
 
-#     preceiver = "akhiyar.waladi@gli.id"
-    print(preceiver)
+#     #preceiver = "akhiyar.waladi@gli.id"
+#     print(preceiver)
 
-    email_date = t1.strftime('%d%b%y %H:%M')
-    psubject = 'Alfagift Alert [{}]'.format(email_date)
+#     email_date = t1.strftime('%d%b%y %H:%M')
+#     psubject = 'Alfagift Alert [{}]'.format(email_date)
 
-    x=dfa.to_html()
-    pbody = """Time between {} and {} there is an abnormal transaction, please check below <br><hr><br> Using vouchers that have been used before {}""".format(t2_window,t1_now,x)
-    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+#     x=dfa.to_html()
+#     pbody = """Time between {} and {} there is an abnormal transaction, please check below <br><hr><br> Using vouchers that have been used before {}""".format(t2_window,t1_now,x)
+#     lib.kirim_email_noreply(preceiver, psubject, pbody, "")
 
 
     

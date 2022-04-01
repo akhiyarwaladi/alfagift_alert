@@ -349,6 +349,8 @@ if b2:
         col_idx = out_voucher_check_2_save.columns.get_loc(column)
         writer.sheets[adder].set_column(col_idx, col_idx, column_width)
 
+    ### saving another sheet
+    results = results.sort_values(by='tbto_ponta_id')
     adder = 'detail'
     #     writer = pd.ExcelWriter(vcr_attach, engine='xlsxwriter') 
     results.to_excel(writer, sheet_name=adder, index=False)
@@ -366,6 +368,8 @@ if b2:
         out_voucher_check_2['count_unique_voucher'] = out_voucher_check_2['count_unique_voucher'].astype('int')
         m2 = True
 
+
+# %%
 
 # %%
 ### OLD WAY TO GET VOUCHER DETAIL
@@ -676,19 +680,19 @@ if m1 or m2 or m3 or m4:
             outdf_format += '{} <br> {} <br><hr><br>'.format(body_format[idx], outdf.to_html())
             
             
-    # mechanism to send email
-    email_date = dr_order.strftime('%d%b%y %H:%M')
-    lib = lib_3d.desan()
-    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
+#     # mechanism to send email
+#     email_date = dr_order.strftime('%d%b%y %H:%M')
+#     lib = lib_3d.desan()
+#     preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
 
-    #preceiver = "akhiyarwaladi@gmail.com"
-    print(preceiver)
+#     #preceiver = "akhiyarwaladi@gmail.com"
+#     print(preceiver)
 
 
-    psubject = 'Alfagift Alert [{}]'.format(email_date)
-    pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
+#     psubject = 'Alfagift Alert [{}]'.format(email_date)
+#     pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
 
-    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+#     lib.kirim_email_noreply(preceiver, psubject, pbody, "")
     
     
     

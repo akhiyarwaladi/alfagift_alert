@@ -38,8 +38,8 @@ message = []
 
 
 
-b1, b2 = False, False
-m1, m2 = False, False
+b1, b2, b3 = False, False, False
+m1, m2, m3 = False, False, False
 
 if ((dr_order.hour) in (list(range(0,24)))) and ((dr_order.minute) == 0):
     b1 = True
@@ -165,11 +165,59 @@ if b2:
 # %%
 
 
-print("m1:{} m2:{}".format(m1,m2))
+
+if b3:
+    
+    try:
+        q_1 = '''
+            select tto.tbto_id, tto.tbto_application_id 
+            from tb_transaction_order tto 
+            where tto.tbto_create_date between '{shift_str}' and '{now_str}'
+            and tbto_status is not null
+            and tbto_status in ('12','14','15')
+            and tbto_application_id in (904,905)
+        '''.format(shift_str = (dr_order-timedelta(hours=1)), now_str = dr_order)
+
+        connection, cursor = ds_db.connect_prd_order_4()
+        res_order = pd.read_sql(q_1, connection)
+        res_order = res_order.dropna().astype(int)
+        connection.close()
+
+        ## testing purpose
+        #res_order = res_order[res_order['tbto_application_id'].isin([402])]
+        if len(res_order) <= 0:
+
+
+            message.append('{} -- {}'.format(str(dr_order-timedelta(hours=1)), str(dr_order)))
+            message.append('Num of trx <= 10 on app order [app_id=904,905]')
+            m3 = True
+            
+        else:
+            print("Num of trx > 10")
+
+
+
+
+    
+    except Exception as e:
+        print(e)
+
 
 
 # %%
-if m1 or m2:
+
+# %%
+
+# %%
+
+# %%
+
+
+print("m1:{} m2:{} m3:{}".format(m1,m2,m3))
+
+
+# %%
+if m1 or m2 or m3:
     
     out_format = ''
     for idx, out_message in enumerate(message):
