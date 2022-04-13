@@ -3,11 +3,20 @@
 # %%
 
 # %%
+import warnings
+import sys
+import os
+sys.path.append('/home/server/gli-data-science/')
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+    os.environ["PYTHONWARNINGS"] = "ignore" # Also affect subprocesses
+
+import ds_db
 import psycopg2
 import pymongo
 import pandas as pd
 pd.options.mode.chained_assignment = None 
-import lib_3d
+import lib_3d_copy2 as lib_3d
 from datetime import datetime, timedelta, date
 
 import telegram
@@ -20,15 +29,7 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth', None)
 
 
-import warnings
-import sys
-import os
-sys.path.append('/home/server/gli-data-science/')
-if not sys.warnoptions:
-    warnings.simplefilter("ignore")
-    os.environ["PYTHONWARNINGS"] = "ignore" # Also affect subprocesses
 
-import ds_db
 
 from sqlalchemy import event,create_engine,types
 driver = 'cx_oracle'
@@ -680,19 +681,19 @@ if m1 or m2 or m3 or m4:
             outdf_format += '{} <br> {} <br><hr><br>'.format(body_format[idx], outdf.to_html())
             
             
-#     # mechanism to send email
-#     email_date = dr_order.strftime('%d%b%y %H:%M')
-#     lib = lib_3d.desan()
-#     preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
+    # mechanism to send email
+    email_date = dr_order.strftime('%d%b%y %H:%M')
+    lib = lib_3d.desan()
+    preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
 
-#     #preceiver = "akhiyarwaladi@gmail.com"
-#     print(preceiver)
+    #preceiver = "akhiyarwaladi@gmail.com"
+    print(preceiver)
 
 
-#     psubject = 'Alfagift Alert [{}]'.format(email_date)
-#     pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
+    psubject = 'Alfagift Alert [{}]'.format(email_date)
+    pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
 
-#     lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
     
     
     
