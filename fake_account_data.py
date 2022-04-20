@@ -76,7 +76,7 @@ alfagift_otp = pd.DataFrame(mycol.find({}))
 
 # %%
 
-
+alfagift_otp.head()
 
 
 
