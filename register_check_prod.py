@@ -9,27 +9,19 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-
-import json
 from joblib import dump, load
-
 
 from datetime import datetime, timedelta, date
 import numpy as np
 
 import os
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
-
 from gibberish_detector import detector
-from nostril import nonsense
-
 
 import redis
 r_con = redis.Redis(host="35.213.143.227", port=6379, db=0)
 
-clf_path = './fraud_model/model/regis_logreg'
+clf_path = './fraud_model/model/regis_logreg.pkl'
 gib1_path = './fraud_model/gibberish-detector/indo_news.model'
 
 class RegisterCheck:
@@ -90,7 +82,6 @@ class RegisterCheck:
         
     def score_gibberish(self, input_email):
         split_email = input_email.split('@')[0]
-        #print(split_email)
 
         flag_gibberish1 = False
 
@@ -100,19 +91,12 @@ class RegisterCheck:
         except Exception as e:
             pass
 
-        flag_gibberish2 = False
 
-        try:
-            if nonsense(split_email):
-                flag_gibberish2 = True
-        except Exception as e:
-            pass
-
-
-        if flag_gibberish1 and flag_gibberish2:
+        if flag_gibberish1:
             return 1
         else:
             return 0
+        
         
     def score_user(self, email, phone, ip_addr, nama):
         
@@ -135,11 +119,6 @@ class RegisterCheck:
         else:
             count_phone = 0
         
-#         X_test = pd.DataFrame()
-#         X_test['score_gibberish'] = [res_gibberish]
-#         X_test['score_sus_email'] = [res_sus_email]
-#         X_test['createdFromIp_count'] = [count_ip]
-#         X_test['phoneSub_count'] = [count_phone]
 
         li_input = [[
             res_gibberish,
@@ -155,14 +134,6 @@ class RegisterCheck:
         'createdFromIp_count',
         'phoneSub_count'
         ]
-#         res_pred = pd.concat([
-#             pd.DataFrame(li_param, columns=['variabel']), 
-#             pd.DataFrame(clf.coef_[0], columns=['bobot']),
-#             pd.DataFrame(X_test.values[0], columns=['feature'])      
-#         ], 1)
-#         res_pred['feature'] = res_pred['feature'].astype(int) 
-#         res_pred['b*f'] = res_pred['bobot'] * res_pred['feature']
-
 
 
         dict_score_parameter = {}
