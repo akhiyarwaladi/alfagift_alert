@@ -19,10 +19,13 @@ import os
 from gibberish_detector import detector
 
 import redis
-r_con = redis.Redis(host="35.213.143.227", port=6379, db=0)
+r_con = redis.Redis(host="10.25.4.67", port=6379, db=0)
 
-clf_path = './fraud_model/model/regis_logreg.pkl'
-gib1_path = './fraud_model/gibberish-detector/indo_news.model'
+clf_path = './fraud_model/registrasi_logreg.pkl'
+gib1_path = './fraud_model/indo_news.model'
+
+with open('./fraud_model/all_email_provider_domains.txt') as f:
+    li_all_provider = f.read().splitlines()
 
 class RegisterCheck:
     def __init__(self) -> None:
@@ -62,43 +65,34 @@ class RegisterCheck:
             i += 1
         return t
 
-    def score_sus_email(self, s):
+    def score_sus_email(self, email_input):
 
-        email_input = s
-        email_input = email_input.split('@')[0]
+        name_input = email_input.split('@')[0]
+        provider_input = email_input.split('@')[-1]
 
 
-
-        pat_count_digit = self.encode(email_input).count('D')
-        pat_encode = self.short_encode(email_input)
+        pat_count_digit = self.encode(name_input).count('D')
+        pat_encode = self.short_encode(name_input)
 
         if pat_encode == 'LD' and pat_count_digit >= 4:
             return 1
         elif pat_encode == 'D':
             return 1
+        elif provider_input not in li_all_provider:
+            return 1
         return 0
 
-        
+
         
     def score_gibberish(self, input_email):
         split_email = input_email.split('@')[0]
 
-        flag_gibberish1 = False
+        score_gib = self.Detector.calculate_probability_of_being_gibberish(split_email)
 
-        try:
-            if self.Detector.is_gibberish(split_email):
-                flag_gibberish1 = True
-        except Exception as e:
-            pass
-
-
-        if flag_gibberish1:
-            return 1
-        else:
-            return 0
+        return score_gib
         
         
-    def score_user(self, email, phone, ip_addr, nama):
+    def score_user_registrasi(self, email, phone, ip_addr, nama):
         
         is_fraud = False
         threshold_expire = 10
@@ -167,6 +161,102 @@ class RegisterCheck:
             'score_parameter':dict_score_parameter,
             'reason':li_reason
         }
+    
+    def score_user_otp(self, ip_adress, device_id, phone_num, device_model):
+        threshold_expire = 86400
+        threshold_pair_ip_deviceid = 5
+        threshold_pair_ip_devicemodel = 5
+        threshold_pair_phone_deviceid = 5
+        sum_score = 0
+        score_pair1 = 0
+        score_pair2 = 0
+        score_pair3 = 0
+        is_fraud = False
+        
+        cur_ip = ip_adress
+        cur_device_id = device_id
+        cur_prefix_phone = phone_num[0:9]
+        cur_device_model = device_model.lower()
+        
+        pair_ip_deviceid = "{} - {}".format(cur_ip, cur_device_id)
+        pair_ip_devicemodel = "{} - {}".format(cur_ip, cur_device_model)
+        pair_phone_deviceid = "{} - {}".format(cur_prefix_phone, cur_device_id)
+        
+        otp_ip_deviceid = r_con.get('otp_ip_deviceid:{}'.format(pair_ip_deviceid))
+        otp_ip_devicemodel = r_con.get('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel))
+        otp_phone_deviceid = r_con.get('otp_phone_deviceid:{}'.format(pair_phone_deviceid))
+
+        ######
+        if otp_ip_deviceid is not None:
+            otp_ip_deviceid = int(otp_ip_deviceid.decode('utf-8')) + 1
+
+            if otp_ip_deviceid > threshold_pair_ip_deviceid:
+                score_pair1 += (otp_ip_deviceid - threshold_pair_ip_deviceid) * 0.2
+
+        else:
+            otp_ip_deviceid = 1
+            
+
+
+        ######
+        if otp_ip_devicemodel is not None:
+            otp_ip_devicemodel = int(otp_ip_devicemodel.decode('utf-8')) + 1
+
+            if otp_ip_devicemodel > threshold_pair_ip_devicemodel:
+                score_pair2 += (otp_ip_devicemodel - threshold_pair_ip_devicemodel) * 0.2
+
+        else:
+            otp_ip_devicemodel = 1
+
+
+
+        ######
+        if otp_phone_deviceid is not None:
+            otp_phone_deviceid = int(otp_phone_deviceid.decode('utf-8')) + 1
+
+            if otp_phone_deviceid > threshold_pair_phone_deviceid:
+                score_pair3 += (otp_phone_deviceid - threshold_pair_phone_deviceid) * 0.2
+
+        else:
+            otp_phone_deviceid = 1
+
+
+
+        r_con.set('otp_ip_deviceid:{}'.format(pair_ip_deviceid),
+              otp_ip_deviceid, ex=threshold_expire)
+
+        r_con.set('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel),
+              otp_ip_devicemodel, ex=threshold_expire)
+
+        r_con.set('otp_phone_deviceid:{}'.format(pair_phone_deviceid),
+              otp_phone_deviceid, ex=threshold_expire)
+        
+        
+        sum_score = score_pair1 + score_pair2 + score_pair3
+        
+        dict_score_parameter = {}
+        dict_score_parameter['ip_deviceid'] = score_pair1
+        dict_score_parameter['ip_devicemodel'] = score_pair2
+        dict_score_parameter['phone_deviceid'] = score_pair3
+        
+        
+        
+        li_reason = []
+        
+        
+        if sum_score > 0.6:
+            is_fraud = True
+            if score_pair1 > 0:
+                li_reason.append('Unusual activity in your network')
+
+        
+        return {
+            'is_fraud':is_fraud,
+            'score_final':sum_score,
+            'score_parameter':dict_score_parameter,
+            'reason':li_reason
+        }
+
 
 
 # %%
