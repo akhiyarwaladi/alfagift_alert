@@ -20,7 +20,6 @@ import lib_3d_copy2 as lib_3d
 from datetime import datetime, timedelta, date
 
 import telegram
-
 from telegram import ParseMode
 
 pd.set_option('display.max_rows', None)
@@ -29,17 +28,13 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth', None)
 
 
-
-
 from sqlalchemy import event,create_engine,types
 driver = 'cx_oracle'
 server = '10.234.152.61' 
 database = 'alfabi' 
 username = 'report' 
 password = 'justd0it'
-engine_stmt = "oracle://%s:%s@%s/%s" % (username, password, server, database )
-
-
+engine_stmt = "oracle://%s:%s@%s/%s" % ( username, password, server, database )
 
 # %%
 
@@ -54,7 +49,6 @@ const_out_voucher_count = 20
 const_out_point_issue = 100000
 const_out_point_redeem = 1000000
 
-
 b1, b2, b3, b4, b5 = False, False, False, False, False
 m1, m2, m3, m4 = False, False, False, False
 
@@ -62,14 +56,16 @@ if (datetime.now().hour) in [1, 2, 3, 4]:
     b1 = True
 if (datetime.now().minute) % 30 == 0:
     b3, b4 = True, True
-if ((datetime.now().hour) == 15) and ((datetime.now().minute)) == 30:
+    
+    
+if ((datetime.now().hour) == 15) and ((datetime.now().minute)) == 33:
     b2 = True
-# if ((datetime.now().hour) == 14):
-#     b2 = True
 if ((datetime.now().hour) == 13) and ((datetime.now().minute)) == 0 and ((datetime.now().day)) == 1:
     b5 = True
 
-# b1, b2, b3, b4 = False, True, True, True
+    
+### FOR TESTING DONT FORGET TO COMMENT
+# b1, b2, b3, b4 = False, True, False, False
 
 # const_out_order = 500
 # const_out_voucher_amount = 300000
@@ -100,10 +96,8 @@ start_look = dr_order-timedelta(minutes=15)
 end_look = dr_order
 
 # %%
-start_look
 
 # %%
-end_look
 
 # %%
 
@@ -353,7 +347,6 @@ if b2:
     ### saving another sheet
     results = results.sort_values(by='tbto_ponta_id')
     adder = 'detail'
-    #     writer = pd.ExcelWriter(vcr_attach, engine='xlsxwriter') 
     results.to_excel(writer, sheet_name=adder, index=False)
 
     # Auto-adjust columns' width
@@ -365,7 +358,7 @@ if b2:
     writer.save()
 
     if (len(out_voucher_check) > 0) or (len(out_voucher_check_2) > 0):
-        out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage']                            .astype(int).apply(lambda x : "{:,d}".format(x))
+        out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage'].astype(int).apply(lambda x : "{:,d}".format(x))
         out_voucher_check_2['count_unique_voucher'] = out_voucher_check_2['count_unique_voucher'].astype('int')
         m2 = True
 
@@ -373,204 +366,6 @@ if b2:
 # %%
 
 # %%
-### OLD WAY TO GET VOUCHER DETAIL
-
-# out_voucher_check = ''
-# out_voucher_check_2 = ''
-# if b2:
-#     q_2 = '''
-#     -- check voucher amount usage and voucher code count in one day interval
-#     select 
-#         tbto_ponta_id, sum(tbto_voucher_usage) as sum_voucher_usage
-#     from 
-#         tb_transaction_order tto 
-#     where 
-#         tto.tbto_create_date between '{shift_str}' and '{now_str}' 
-#         and tbto_ponta_id is not null
-#         and tbto_voucher_usage is not null
-#         and tto.tbto_status not in ('18','10','11')
-#         and tbto_voucher_code not in ('')
-#         and tbto_status is not null
-#     group by tbto_ponta_id
-#     order by sum_voucher_usage desc
-
-#     '''.format(shift_str=str(dr_voucher-timedelta(days=1)), now_str=str(dr_voucher))
-    
-#     voucher_check = pd.read_sql(q_2, connection)
-    
-    
-#     q_5 = '''
-#     -- check voucher amount usage and voucher code count in one day interval
-#     select 
-#         tbto_ponta_id, count(distinct(tbto_voucher_code)) as count_unique_voucher
-#     from 
-#         tb_transaction_order tto 
-#     where 
-#         tto.tbto_create_date between '{shift_str}' and '{now_str}' 
-#         and tbto_ponta_id is not null
-#         and tbto_voucher_usage is not null
-#         and tto.tbto_status not in ('18','10','11')
-#         and tbto_voucher_code not in ('')
-#         and tbto_status is not null
-#     group by tbto_ponta_id
-#     order by count_unique_voucher desc
-
-#     '''.format(shift_str=str(dr_voucher-timedelta(days=1)), now_str=str(dr_voucher))
-    
-#     voucher_check_2 = pd.read_sql(q_5, connection)
-    
-#     out_voucher_check = voucher_check[voucher_check['sum_voucher_usage'] >= const_out_voucher_amount]
-#     out_voucher_check_2 = voucher_check_2[voucher_check_2['count_unique_voucher'] >= const_out_voucher_count]
-
-    
-#     if len(out_voucher_check_2) > 0:
-#         if len(out_voucher_check_2) == 1:
-#             tup_mem = tuple(list(out_voucher_check_2['tbto_ponta_id']) + ['1'])
-#         else:
-#             tup_mem = tuple(out_voucher_check_2['tbto_ponta_id'])
-            
-#         q='''
-#         SELECT NO_KARTU, NAMA_LENGKAP, NIK_KARYAWAN
-#         FROM MASTER_CUST mc 
-#         WHERE NO_KARTU in {}
-
-#         '''.format(tup_mem)
-#         con = connect_alfabi()
-#         mc = pd.read_sql(q, con)
-#         con.close()
-
-#         out_voucher_check_2_save = pd.merge(out_voucher_check_2, mc, left_on='tbto_ponta_id', 
-#                                        right_on='NO_KARTU', how='left').fillna('-').drop('NO_KARTU',1)  
-        
-#         out_voucher_check_2_save = out_voucher_check_2_save.rename(columns={'tbto_ponta_id':'ponta_id', 
-#                     'count_unique_voucher':'count', 'NAMA_LENGKAP':'nama', 'NIK_KARYAWAN':'NIK'})
-
-
-
-#         ponta_id = tuple(map(str,list(out_voucher_check_2['tbto_ponta_id'])+['1']))
-
-#         query = '''
-#         select 
-#             tto.tbto_no, tto.tbto_create_date, tto.tbto_ponta_id, tto.tbto_voucher_code, tto.tbto_voucher_usage
-#         from 
-#             tb_transaction_order tto 
-#         where 
-#             tto.tbto_create_date between '{shift_str}' and '{now_str}' 
-#             and tbto_ponta_id is not null
-#             and tbto_voucher_usage is not null
-#             and tto.tbto_status not in ('18','10','11')
-#             and tto.tbto_voucher_code not in ('')
-#             and tto.tbto_status is not null
-#             and tto.tbto_ponta_id in {ponta_id}
-#         '''.format(shift_str=str(dr_voucher-timedelta(hours=30)), now_str=str(dr_voucher), ponta_id=ponta_id)
-#         results = pd.read_sql_query(query, connection)
-      
-        
-#         li_vcr = list(results['tbto_voucher_code'])
-
-#         try:
-#             ## find voucher in master voucher using voucher code to get reward id
-#             koneksi4 = pymongo.MongoClient\
-#             ("mongodb://user_read:read12345678@35.240.152.164:27017/alfagift_loyalty_promotion")
-#             mydb = koneksi4["alfagift_loyalty_promotion"]
-#             mycol = mydb["alfagift_master_voucher"]
-
-            
-#             rew_vcr = pd.DataFrame(mycol.find({'reg_code':{"$in":li_vcr}}))
-#             rew_vcr = rew_vcr[['reward_id','reg_code','voucher_used_by','ponta_id']]
-#             from bson.objectid import ObjectId
-#             li_rew = [ObjectId(rew) for rew in list(rew_vcr['reward_id'])]
-#             ##
-            
-#             ## find rewad in master reward to get detail campaign
-#             koneksi4 = pymongo.MongoClient\
-#                     ("mongodb://user_mkt:us3r_mkt@35.213.177.53:27017/alfagift_cms")
-#             mydb = koneksi4["alfagift_cms"]
-#             mycol = mydb["alfagift_master_reward"]
-
-
-#             rew_det = pd.DataFrame(mycol.find({'_id':{"$in":li_rew}}))
-#             rew_det = rew_det[['_id','reward_name','reward_start_date','reward_end_date','voucher_type'
-#                                ,'created_at','created_by','created_by_mail']]
-#             rew_det['_id'] = rew_det['_id'].astype(str)
-#             ##
-            
-#             ## merging master voucher and campaign detail
-#             rew_merge = pd.merge(rew_vcr,rew_det, left_on='reward_id', right_on='_id', how='left').drop('_id',1)
-
-
-#         except Exception as e:
-#             print(e)
-#             rew_merge=pd.DataFrame()
-#             pass
-#         try:
-#             if len(li_vcr) == 1:
-#                 tup_vcr = tuple(li_vcr+['1'])
-#             else:
-#                 tup_vcr = tuple(li_vcr)
-#             query = '''
-#             SELECT est.ELS_RECEIPT, est.ELS_SMS_REGISTRATION_CODE, esmp.MSO_DESCP, esmp.MSO_KET, esmp.MSO_CREATE_USER 
-#             FROM ELS_SMS_TRANS est 
-#             LEFT JOIN ELS_SMS_MS_PROMO esmp 
-#             ON est.ELS_MSO_ID  = esmp.MSO_ID 
-#             WHERE est.ELS_SMS_REGISTRATION_CODE in {}
-
-
-#             '''.format(tup_vcr)
-#             con_alfabi = connect_alfabi()
-#             results_alfabi = pd.read_sql_query(query, con_alfabi)
-
-
-#             con_alfabi.close()
-
-#             create_user_map={'1012115509':'SUGIYONO',
-#             '1014117821':'BETHA CHRISTY',
-#             '1015109216':'HIOE RINA MARIA',
-#             '1017098020':'ENVY ELISHA WIJAYA',
-#             '12113935':'SUGIYONO',
-#             '19041727':'KAISYA AZZAHRA KADAR SARIFANI'}
-
-#             results = pd.merge(results, results_alfabi, left_on='tbto_voucher_code', right_on='ELS_SMS_REGISTRATION_CODE', how='left')
-#             results['MSO_CREATE_USER_NAME'] = results['MSO_CREATE_USER'].map(create_user_map)
-#             results['MSO_CREATE_USER_NAME'] = results['MSO_CREATE_USER_NAME'].fillna('gli')
-            
-#             results = pd.merge(results, rew_merge, left_on='tbto_voucher_code', right_on='reg_code', how='left')
-
-
-
-#         except Exception as e:
-#             print(e)
-#             pass
-
-
-
-#     vcr_attach = '/home/server/gli-data-science/akhiyar/alfagift_alert/voucher_used_detail_{}.xlsx'.format(dr_order.strftime('%d%b%y'))
-#     adder = 'alert'
-#     writer = pd.ExcelWriter(vcr_attach, engine='xlsxwriter') 
-#     out_voucher_check_2_save.to_excel(writer, sheet_name=adder, index=False)
-
-#     # Auto-adjust columns' width
-#     for column in out_voucher_check_2_save:
-#         column_width = max(out_voucher_check_2_save[column].astype(str).map(len).max(), len(column))
-#         col_idx = out_voucher_check_2_save.columns.get_loc(column)
-#         writer.sheets[adder].set_column(col_idx, col_idx, column_width)
-        
-#     adder = 'detail'
-# #     writer = pd.ExcelWriter(vcr_attach, engine='xlsxwriter') 
-#     results.to_excel(writer, sheet_name=adder, index=False)
-
-#     # Auto-adjust columns' width
-#     for column in results:
-#         column_width = max(results[column].astype(str).map(len).max(), len(column))
-#         col_idx = results.columns.get_loc(column)
-#         writer.sheets[adder].set_column(col_idx, col_idx, column_width)
-
-#     writer.save()
-
-#     if (len(out_voucher_check) > 0) or (len(out_voucher_check_2) > 0):
-#         out_voucher_check['sum_voucher_usage'] = out_voucher_check['sum_voucher_usage']                            .astype(int).apply(lambda x : "{:,d}".format(x))
-#         out_voucher_check_2['count_unique_voucher'] = out_voucher_check_2['count_unique_voucher'].astype('int')
-#         m2 = True
 
 
 # %%
@@ -660,10 +455,30 @@ print(m1,m2,m3,m4)
 
 
 # %%
+li_recipient = [
+    'product.operation@gli.id',
+    'marketingvoucher@gli.id',
+    'chandra.hermawan@gli.id',
+    'erick.alviyendra@gli.id',
+    'rina.maria@gli.id',
+    'deny.d.retnawati@gli.id',
+    'envy.elisha@gli.id',
+    'juvita@gli.id',
+    'jimmy.umboh@gli.id',
+    'realita.wiguna@gli.id',
+    'fransin.marshal@gli.id',
+    'sugiyono.subianto@gli.id',
+    'eunike.e.handayani@gli.id',
+    'akhiyar.waladi@gli.id'
+]
 
+preceiver_voucher = ''
+for idx, el in enumerate(li_recipient):
+    preceiver_voucher += el
+    if idx < len(li_recipient)-1:
+        preceiver_voucher += ', '
 
-
-
+# %%
 
 # %%
 if m1 or m2 or m3 or m4:
@@ -685,15 +500,17 @@ if m1 or m2 or m3 or m4:
     email_date = dr_order.strftime('%d%b%y %H:%M')
     lib = lib_3d.desan()
     preceiver = "product.operation@gli.id, william.d.sinolungan@gli.id, akhiyar.waladi@gli.id"
-
-    #preceiver = "akhiyarwaladi@gmail.com"
+    if m2:
+        preceiver = preceiver_voucher
+        
+    #preceiver = "akhiyarwaladi@gmail.com,akhiyar.waladi@gli.id"
     print(preceiver)
 
 
     psubject = 'Alfagift Alert [{}]'.format(email_date)
     pbody = """Time {} there is an abnormal transaction, please check below <br><hr><br> {}""".format(email_date, outdf_format)
 
-    lib.kirim_email_noreply(preceiver, psubject, pbody, "")
+    lib.kirim_email_noreply(preceiver, psubject, pbody, vcr_attach)
     
     
     

@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 # coding: utf-8
 # %%
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+from datetime import datetime
 
-def warn(*args, **kwargs):
-    pass
-import warnings
-warnings.warn = warn
+from warnings import simplefilter
+simplefilter(action='ignore', category=FutureWarning)
 
-from joblib import dump, load
+from joblib import load
 
-from datetime import datetime, timedelta, date
 import numpy as np
 
 import os
 
 from gibberish_detector import detector
 
+#from common import global_variable
+# r_con = global_variable.r
 import redis
-r_con = redis.Redis(host="10.25.4.67", port=6379, db=0)
+r_con = redis.Redis(host='10.25.4.67',port='6379')
+
 
 clf_path = './fraud_model/registrasi_logreg.pkl'
 gib1_path = './fraud_model/indo_news.model'
@@ -95,7 +94,7 @@ class RegisterCheck:
     def score_user_registrasi(self, email, phone, ip_addr, nama):
         
         is_fraud = False
-        threshold_expire = 10
+        threshold_expire = 86400
         
         res_gibberish = self.score_gibberish(email)
         res_sus_email = self.score_sus_email(email)
@@ -149,11 +148,11 @@ class RegisterCheck:
             
             
             
-        r_con.set('regis_ip:{}'.format(ip_addr),
-        count_ip + 1, ex=threshold_expire)
+#         r_con.set('regis_ip:{}'.format(ip_addr),
+#         count_ip + 1, ex=threshold_expire)
 
-        r_con.set('regis_prefixphone:{}'.format(phone[0:9]),
-        count_phone + 1, ex=threshold_expire)
+#         r_con.set('regis_prefixphone:{}'.format(phone[0:9]),
+#         count_phone + 1, ex=threshold_expire)
         
         return {
             'is_fraud':is_fraud,
@@ -182,10 +181,17 @@ class RegisterCheck:
         pair_ip_devicemodel = "{} - {}".format(cur_ip, cur_device_model)
         pair_phone_deviceid = "{} - {}".format(cur_prefix_phone, cur_device_id)
         
+        print('pair 1 {}'.format(pair_ip_deviceid))
+        print('pair 2 {}'.format(pair_ip_devicemodel))
+        print('pair 3 {}'.format(pair_phone_deviceid))
         otp_ip_deviceid = r_con.get('otp_ip_deviceid:{}'.format(pair_ip_deviceid))
         otp_ip_devicemodel = r_con.get('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel))
         otp_phone_deviceid = r_con.get('otp_phone_deviceid:{}'.format(pair_phone_deviceid))
 
+        
+        print('score 1 {}'.format(otp_ip_deviceid))
+        print('score 2 {}'.format(otp_ip_devicemodel))
+        print('score 3 {}'.format(otp_phone_deviceid))
         ######
         if otp_ip_deviceid is not None:
             otp_ip_deviceid = int(otp_ip_deviceid.decode('utf-8')) + 1
@@ -222,14 +228,14 @@ class RegisterCheck:
 
 
 
-        r_con.set('otp_ip_deviceid:{}'.format(pair_ip_deviceid),
-              otp_ip_deviceid, ex=threshold_expire)
+#         r_con.set('otp_ip_deviceid:{}'.format(pair_ip_deviceid),
+#               otp_ip_deviceid, ex=threshold_expire)
 
-        r_con.set('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel),
-              otp_ip_devicemodel, ex=threshold_expire)
+#         r_con.set('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel),
+#               otp_ip_devicemodel, ex=threshold_expire)
 
-        r_con.set('otp_phone_deviceid:{}'.format(pair_phone_deviceid),
-              otp_phone_deviceid, ex=threshold_expire)
+#         r_con.set('otp_phone_deviceid:{}'.format(pair_phone_deviceid),
+#               otp_phone_deviceid, ex=threshold_expire)
         
         
         sum_score = score_pair1 + score_pair2 + score_pair3
