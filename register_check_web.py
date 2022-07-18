@@ -91,7 +91,7 @@ class RegisterCheck:
         return score_gib
         
         
-    def score_user_registrasi(self, email, phone, ip_addr, nama):
+    def score_user_registrasi_web(self, email, phone, ip_addr, nama):
         
         is_fraud = False
         threshold_expire = 86400
@@ -100,13 +100,13 @@ class RegisterCheck:
         res_sus_email = self.score_sus_email(email)
         
         
-        count_ip = r_con.get('regis_ip:{}'.format(ip_addr))
+        count_ip = r_con.get('web_regis_ip:{}'.format(ip_addr))
         if count_ip is not None:
             count_ip = int(count_ip.decode('utf-8'))
         else:
             count_ip = 0
             
-        count_phone = r_con.get('regis_prefixphone:{}'.format(phone[0:9]))
+        count_phone = r_con.get('web_regis_prefixphone:{}'.format(phone[0:9]))
         if count_phone is not None:
             count_phone = int(count_phone.decode('utf-8'))
         else:
@@ -139,20 +139,20 @@ class RegisterCheck:
         li_reason = []
         if score[0][-1] >= 0.6:
             is_fraud = True
-            if res_gibberish == 1 or res_sus_email == 1:
+            if res_gibberish > 4 or res_sus_email == 1:
                 li_reason.append('Email kamu menggunakan pola tidak wajar')
-            if count_ip >= 5:
+            if count_ip >= 1:
                 li_reason.append('IP kamu sudah digunakan oleh pendaftaran pada akun lain')
-            if count_phone >= 5:
+            if count_phone >= 1:
                 li_reason.append('Prefix no handphone terlihat sama dengan pendaftar pada akun lain')
             
             
             
-#         r_con.set('regis_ip:{}'.format(ip_addr),
-#         count_ip + 1, ex=threshold_expire)
+        r_con.set('web_regis_ip:{}'.format(ip_addr),
+        count_ip + 1, ex=threshold_expire)
 
-#         r_con.set('regis_prefixphone:{}'.format(phone[0:9]),
-#         count_phone + 1, ex=threshold_expire)
+        r_con.set('web_regis_prefixphone:{}'.format(phone[0:9]),
+        count_phone + 1, ex=threshold_expire)
         
         return {
             'is_fraud':is_fraud,
@@ -161,99 +161,84 @@ class RegisterCheck:
             'reason':li_reason
         }
     
-    def score_user_otp(self, ip_adress, device_id, phone_num, device_model):
+    def score_user_otp_web(self, ip, fingerprint, phone_num, user_agent):
         threshold_expire = 86400
-        threshold_pair_ip_deviceid = 5
-        threshold_pair_ip_devicemodel = 5
-        threshold_pair_phone_deviceid = 5
+        
+        threshold_pair_ip_fingerprint = 5
+        threshold_pair_prefixphone_fingerprint = 5
+
         sum_score = 0
         score_pair1 = 0
         score_pair2 = 0
-        score_pair3 = 0
         is_fraud = False
         
-        cur_ip = ip_adress
-        cur_device_id = device_id
-        cur_prefix_phone = phone_num[0:9]
-        cur_device_model = device_model.lower()
-        
-        pair_ip_deviceid = "{} - {}".format(cur_ip, cur_device_id)
-        pair_ip_devicemodel = "{} - {}".format(cur_ip, cur_device_model)
-        pair_phone_deviceid = "{} - {}".format(cur_prefix_phone, cur_device_id)
-        
-        print('pair 1 {}'.format(pair_ip_deviceid))
-        print('pair 2 {}'.format(pair_ip_devicemodel))
-        print('pair 3 {}'.format(pair_phone_deviceid))
-        otp_ip_deviceid = r_con.get('otp_ip_deviceid:{}'.format(pair_ip_deviceid))
-        otp_ip_devicemodel = r_con.get('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel))
-        otp_phone_deviceid = r_con.get('otp_phone_deviceid:{}'.format(pair_phone_deviceid))
+        cur_ip = ip
+        cur_fingerprint = fingerprint
+        cur_prefixphone = phone_num[0:9]
 
         
-        print('score 1 {}'.format(otp_ip_deviceid))
-        print('score 2 {}'.format(otp_ip_devicemodel))
-        print('score 3 {}'.format(otp_phone_deviceid))
+        pair_ip_fingerprint = "{} - {}".format(cur_ip, cur_fingerprint)
+        pair_prefixphone_fingerprint = "{} - {}".format(cur_prefixphone, cur_fingerprint)
+
+        
+        print('pair 1 {}'.format(pair_ip_fingerprint))
+        print('pair 2 {}'.format(pair_prefixphone_fingerprint))
+
+        otp_ip_fingerprint = r_con.get('web_otp_ip_fingerprint:{}'.format(pair_ip_fingerprint))
+        otp_prefixphone_fingerprint = r_con.get('web_otp_prefixphone_fingerprint:{}'.format(pair_prefixphone_fingerprint))
+    
+
+        print('score 1 {}'.format(otp_ip_fingerprint))
+        print('score 2 {}'.format(otp_prefixphone_fingerprint))
+
         ######
-        if otp_ip_deviceid is not None:
-            otp_ip_deviceid = int(otp_ip_deviceid.decode('utf-8')) + 1
+        if otp_ip_fingerprint is not None:
+            otp_ip_fingerprint = int(otp_ip_fingerprint.decode('utf-8')) + 1
 
-            if otp_ip_deviceid > threshold_pair_ip_deviceid:
-                score_pair1 += (otp_ip_deviceid - threshold_pair_ip_deviceid) * 0.2
+            if otp_ip_fingerprint > threshold_pair_ip_fingerprint:
+                score_pair1 += (otp_ip_fingerprint - threshold_pair_ip_fingerprint) * 0.2
 
         else:
-            otp_ip_deviceid = 1
+            otp_ip_fingerprint = 1
             
 
 
         ######
-        if otp_ip_devicemodel is not None:
-            otp_ip_devicemodel = int(otp_ip_devicemodel.decode('utf-8')) + 1
+        if otp_prefixphone_fingerprint is not None:
+            otp_prefixphone_fingerprint = int(otp_prefixphone_fingerprint.decode('utf-8')) + 1
 
-            if otp_ip_devicemodel > threshold_pair_ip_devicemodel:
-                score_pair2 += (otp_ip_devicemodel - threshold_pair_ip_devicemodel) * 0.2
-
-        else:
-            otp_ip_devicemodel = 1
-
-
-
-        ######
-        if otp_phone_deviceid is not None:
-            otp_phone_deviceid = int(otp_phone_deviceid.decode('utf-8')) + 1
-
-            if otp_phone_deviceid > threshold_pair_phone_deviceid:
-                score_pair3 += (otp_phone_deviceid - threshold_pair_phone_deviceid) * 0.2
+            if otp_prefixphone_fingerprint > threshold_pair_prefixphone_fingerprint:
+                score_pair2 += (otp_prefixphone_fingerprint - threshold_pair_prefixphone_fingerprint) * 0.2
 
         else:
-            otp_phone_deviceid = 1
+            otp_prefixphone_fingerprint = 1
 
 
 
-#         r_con.set('otp_ip_deviceid:{}'.format(pair_ip_deviceid),
-#               otp_ip_deviceid, ex=threshold_expire)
+        r_con.set('web_otp_ip_fingerprint:{}'.format(pair_ip_fingerprint),
+              otp_ip_fingerprint, ex=threshold_expire)
 
-#         r_con.set('otp_ip_devicemodel:{}'.format(pair_ip_devicemodel),
-#               otp_ip_devicemodel, ex=threshold_expire)
+        r_con.set('web_otp_prefixphone_fingerprint:{}'.format(pair_prefixphone_fingerprint),
+              otp_prefixphone_fingerprint, ex=threshold_expire)
 
-#         r_con.set('otp_phone_deviceid:{}'.format(pair_phone_deviceid),
-#               otp_phone_deviceid, ex=threshold_expire)
+
         
-        
-        sum_score = score_pair1 + score_pair2 + score_pair3
+        sum_score = score_pair1 + score_pair2
         
         dict_score_parameter = {}
-        dict_score_parameter['ip_deviceid'] = score_pair1
-        dict_score_parameter['ip_devicemodel'] = score_pair2
-        dict_score_parameter['phone_deviceid'] = score_pair3
-        
-        
-        
+        dict_score_parameter['ip_fingerprint'] = score_pair1
+        dict_score_parameter['prefixphone_fingerprint'] = score_pair2
+
+              
         li_reason = []
         
         
-        if sum_score > 0.6:
+        if sum_score >= 0.4:
             is_fraud = True
             if score_pair1 > 0:
-                li_reason.append('Unusual activity in your network')
+                li_reason.append('Pasangan IP dan Fingerprint kamu telah digunakan')
+            if score_pair2 > 0:
+                li_reason.append('Pasangan Phone Prefix and Fingerprint kamu telah digunakan')
 
         
         return {
@@ -264,6 +249,10 @@ class RegisterCheck:
         }
 
 
+
+# %%
+
+# %%
 
 # %%
 
